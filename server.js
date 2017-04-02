@@ -5,7 +5,10 @@ const quark = require('quark')();
 const ENV = process.env.NODE_ENV || 'development';
 const knexInstance = knex(config.database);
 
-['users'].forEach(service => {
+[
+    'users',
+    'roles'
+].forEach(service => {
     const s = require(`./services/${service}`);
     quark.use(s.initialize(knexInstance));
 });

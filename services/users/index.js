@@ -1,18 +1,24 @@
 'use strict';
 
 const UserUtils = require('./userUtils');
+const userUtils = new UserUtils();
 const UserQueryExecuter = require('./userQueryExecuter');
 const quark = require('quark')();
-const userUtils = new UserUtils();
 
-exports.initialize = (knex) => {
+module.exports.name = 'users';
+
+function initialize(knex) {
     const queryExecuter = new UserQueryExecuter(knex);
 
     quark.define({
         entity: 'users',
-        action: 'getAll'
+        action: 'get_one'
     }, (args, callback) => {
-        queryExecuter.getAll()
+        if (!args.id) {
+            return callback('no id');
+        }
+        const userId = parseInt(args.id);
+        queryExecuter.getOneUser(userId)
             .then(result => {
                 const users = userUtils.mapUsersToDto(result);
                 callback(null, users);
@@ -24,21 +30,20 @@ exports.initialize = (knex) => {
 
     quark.define({
         entity: 'users',
-        action: 'getOne',
+        action: 'get_all'
     }, (args, callback) => {
-        if (!args.id) {
-            return callback('no id');
-        }
-        const userId = parseInt(args.id);
-        queryExecuter.getOne(userId)
+        queryExecuter.getAll()
             .then(result => {
-                const user = userUtils.mapUsersToDto(result);
-                callback(null, user);
+                const users = userUtils.mapUsersToDto(result);
+                callback(null, users);
             })
-            .callback(err => {
+            .catch(err => {
                 callback(err);
             });
     });
 
+
     return quark;
 };
+
+module.exports.initialize = initialize;

@@ -9,6 +9,7 @@ class UserUtils {
         users = [].concat(users);
         let results = _.map(users, user => {
             let result = {
+                id: user.id,
                 name: user.name || null,
                 email: user.email || null,
                 role: user.user_role || null,
