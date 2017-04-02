@@ -2,7 +2,6 @@ const config = require('./config/main');
 const knex = require('knex');
 const quark = require('quark')();
 
-console.log("CONFIG CON", config.config);
 const ENV = process.env.NODE_ENV || 'development';
 const knexInstance = knex(config.database);
 
