@@ -7,7 +7,8 @@ const knexInstance = knex(config.database);
 
 [
     'users',
-    'roles'
+    'roles',
+    'domains'
 ].forEach(service => {
     const s = require(`./services/${service}`);
     quark.use(s.initialize(knexInstance));
