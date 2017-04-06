@@ -1,4 +1,4 @@
-export function up(knex, Promise) {
+function up(knex, Promise) {
     return Promise.all([
         knex.schema
         .createTable('roles', table => {
@@ -28,10 +28,13 @@ export function up(knex, Promise) {
     ]);
 };
 
-export function down(knex, Promise) {
+function down(knex, Promise) {
     return Promise.all([
         knex.schema.dropTableIsExists('UserRoles'),
         knex.schema.dropTableIsExists('Roles'),
         knex.schema.dropTableIsExists('Users')
     ]);
 };
+
+module.exports.up = up;
+module.exports.down = down;

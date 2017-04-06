@@ -9,8 +9,8 @@ module.exports = {
         connection: {
             host: '127.0.0.1',
             user: 'root',
-            password: 'root',
-            database: 'world'
+            password: 'anastanca',
+            database: 'macaroon'
         },
         pool: {
             min: 2,
