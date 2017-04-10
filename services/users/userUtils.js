@@ -12,7 +12,7 @@ class UserUtils {
                 id: user.id,
                 name: user.name || null,
                 email: user.email || null,
-                role: user.user_role || null,
+                roles: user.roles ? _.map(user.roles, 'role') : null,
                 points: user.points || 0,
                 createdAt: user.created_at || null,
                 lastLogin: user.last_login || null
@@ -20,6 +20,27 @@ class UserUtils {
             return result;
         });
         return results;
+    };
+
+    mapDtoToDatabaseModel(user) {
+        const dbUser = {
+            email: user.email,
+            name: user.name,
+            points: user.points || 0
+        };
+        return dbUser;
+    };
+
+    findUserRank(allUsersPoints, userPoints) {
+        const usersLen = allUsersPoints.length;
+        let rank = 1;
+        for (let i = 0; i < usersLen; i++) {
+            let currentUserPoints = allUsersPoints[i];
+            if (currentUserPoints >= userPoints) {
+                ++rank;
+            }
+        }
+        return rank;
     };
 };
 

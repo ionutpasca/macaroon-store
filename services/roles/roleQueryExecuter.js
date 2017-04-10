@@ -6,8 +6,16 @@ class RoleQueryExecuter {
     };
 
     getAll() {
-        return this.knex.select().table('roles');
-    }
+        return this.knex('roles').select();
+    };
+
+    async getDefaultRole() {
+        const role = await this.knex('roles')
+            .where('name', 'default')
+            .select('id')
+            .limit(1);
+        return role[0].id;
+    };
 };
 
 module.exports = RoleQueryExecuter;

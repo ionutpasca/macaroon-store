@@ -11,14 +11,13 @@ function initialize(knex) {
     quark.define({
         entity: 'roles',
         action: 'get_all'
-    }, (args, callback) => {
-        queryExecuter.getAll()
-            .then(result => {
-                callback(null, result);
-            })
-            .catch(err => {
-                callback(err);
-            });
+    }, async (args, callback) => {
+        try {
+            const roles = await queryExecuter.getAll();
+            callback(null, roles);
+        } catch (error) {
+            callback(error);
+        };
     });
 
     return quark;
