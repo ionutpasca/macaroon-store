@@ -40,6 +40,29 @@ class UserQueryExecuter {
             });
     };
 
+    remove(userId) {
+        this.knex.transaction(async trx => {
+            try {
+                let user = await trx.select().from('users')
+                    .where('id', userId);
+                user = user[0];
+
+                await trx.where('rank', '>', user.rank)
+                    .decrement('rank')
+                    .into('users');
+
+                await trx.where('user_id', userId).del().into('user_roles');
+                await trx.where('id', userId).del().into('users');
+
+                trx.commit;
+                return userId;
+            } catch (error) {
+                trx.rollback;
+                throw new Error();
+            }
+        });
+    };
+
 };
 
 module.exports = UserQueryExecuter;

@@ -75,6 +75,21 @@ function initialize(knex) {
         };
     });
 
+    quark.define({
+        entity: 'users',
+        action: 'delete'
+    }, async (args, callback) => {
+        if (!args.id) {
+            return callback('no id');
+        }
+        try {
+            let response = await queryExecuter.remove(args.id);
+            callback(null, response);
+        } catch (error) {
+            callback(error);
+        }
+    });
+
     return quark;
 };
 
