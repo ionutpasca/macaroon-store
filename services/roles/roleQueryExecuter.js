@@ -12,9 +12,9 @@ class RoleQueryExecuter {
     async getDefaultRole() {
         const role = await this.knex('roles')
             .where('name', 'default')
-            .select('id')
+            .select()
             .limit(1);
-        return role[0].id;
+        return role[0];
     };
 };
 

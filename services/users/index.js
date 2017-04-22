@@ -7,8 +7,6 @@ const UserQueryExecuter = require('./userQueryExecuter');
 const RoleQueryExecuter = require('../roles/roleQueryExecuter');
 
 const quark = require('quark')();
-const Treeize = require('treeize');
-
 const _ = require('lodash');
 
 module.exports.name = 'users';
@@ -27,10 +25,8 @@ function initialize(knex) {
         try {
             const userId = parseInt(args.id);
             const getResult = await queryExecuter.getOne(userId);
+            let users = userUtils.growTreeFromData(getResult)[0];
 
-            const tree = new Treeize();
-            tree.grow(getResult);
-            let users = tree.getData();
             callback(null, users);
         } catch (error) {
             callback(error);
@@ -39,13 +35,49 @@ function initialize(knex) {
 
     quark.define({
         entity: 'users',
+        action: 'get_one_by_email_and_pass'
+    }, async (args, callback) => {
+        if (!args.email || !args.password) {
+            return callback('no data');
+        }
+        try {
+            const getResult = await queryExecuter.getOneByEmail(args.email, true);
+            const user = userUtils.growTreeFromData(getResult)[0];
+
+            const passwordsMatch = await userUtils.comparePasswords(args.password, user.password);
+            if (!passwordsMatch) {
+                let notFoundErr = new Error('Unauthorized');
+                notFoundErr.status = 401;
+                callback(notFoundErr);
+            }
+            callback(null, user);
+        } catch (error) {
+            callback(error);
+        }
+    });
+
+    quark.define({
+        entity: 'users',
+        action: 'user_exists'
+    }, async (args, callback) => {
+        if (!args.email) {
+            return callback('no data');
+        }
+        try {
+            const userExists = await queryExecuter.userExists(args.email);
+            callback(null, userExists);
+        } catch (error) {
+            callback(error);
+        }
+    });
+
+    quark.define({
+        entity: 'users',
         action: 'get_all'
     }, async (args, callback) => {
         try {
             const getAllResult = await queryExecuter.getAll();
-            const tree = new Treeize();
-            tree.grow(getAllResult);
-            let users = tree.getData();
+            let users = userUtils.growTreeFromData(getAllResult);
 
             users = userUtils.mapUsersToDto(users);
             callback(null, users);
@@ -58,18 +90,22 @@ function initialize(knex) {
         entity: 'users',
         action: 'insert'
     }, async (args, callback) => {
-        let userToInsert = userUtils.mapDtoToDatabaseModel(args.user);
+        const user = args.user;
+        let userToInsert = userUtils.mapDtoToDatabaseModel(user);
         try {
-            const userRole = args.user.roleId ? 
-                args.user.roleId : 
-                await roleQueryExecuter.getDefaultRole();
+            const userRole = await roleQueryExecuter.getDefaultRole();
+            userToInsert.rank = await queryExecuter.computeRankForUser(userToInsert.points);
+            if (user.password) {
+                userToInsert.password = await userUtils.encryptPassword(user.password);
+            }
 
-            let usersPoints = await queryExecuter.getAllUsersPoints();
-            usersPoints = _.map(usersPoints, 'points');
-            userToInsert.rank = userUtils.findUserRank(usersPoints, userToInsert.points);
-
-            const insertResult = await queryExecuter.insert(userToInsert, userRole);
-            callback(null, insertResult);
+            const insertedUserId = await queryExecuter.insert(userToInsert, userRole);
+            userToInsert = _.assign(userToInsert,
+                {
+                    roles: [userRole.name],
+                    id: insertedUserId
+                });
+            callback(null, userToInsert);
         } catch (error) {
             callback(error);
         };

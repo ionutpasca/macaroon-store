@@ -17,6 +17,18 @@ class UserQueryExecuter {
             .select(selectFields);
     };
 
+    getOneByEmail(userEmail, includePassword) {
+        let selectFields = this.fieldsAllowedToSelect.concat('roles.name as roles:role');
+        if (includePassword) {
+            selectFields = selectFields.concat('users.password');
+        }
+        return this.knex('users')
+            .where({ 'users.email': userEmail })
+            .innerJoin('user_roles', 'user_roles.user_id', '=', 'users.id')
+            .innerJoin('roles', 'user_roles.role_id', '=', 'roles.id')
+            .select(selectFields);
+    };
+
     getAll() {
         const selectFields = this.fieldsAllowedToSelect.concat('roles.name as roles:role');
         return this.knex('users')
@@ -29,15 +41,41 @@ class UserQueryExecuter {
         return this.knex('users').select('points');
     };
 
-    insert(user, roleId) {
-        return this.knex('users').insert(user)
-            .then(insertedUserId => {
-                const userRole = {
-                    role_id: roleId,
-                    user_id: insertedUserId
-                };
-                return this.knex('user_roles').insert(userRole);
+    async userExists(email) {
+        const usersCount = await this.knex('users')
+            .select(this.knex.raw('count(1) as RowsCount'))
+            .where({ 'email': email });
+        return usersCount[0].RowsCount > 0 ? true : false;
+    };
+
+    async computeRankForUser(userPoints) {
+        const usersWithLessPoints = await this.knex('users')
+            .select(this.knex.raw('count(1) as RowsCount'))
+            .where('points', '>=', userPoints);
+        return usersWithLessPoints[0].RowsCount + 1;
+    };
+
+    async insert(user, role) {
+        return new Promise((resolve, reject) => {
+            this.knex.transaction(async trx => {
+                try {
+                    const insertedUserId = await trx.insert(user).into('users');
+                    const userRole = {
+                        role_id: role.id,
+                        user_id: insertedUserId[0]
+                    };
+
+                    await trx.insert(userRole).into('user_roles')
+                    await trx.increment('rank').where('points', '<', user.points).into('users');
+
+                    trx.commit;
+                    resolve(insertedUserId[0]);
+                } catch (error) {
+                    trx.rollback();
+                    reject(error);
+                }
             });
+        });
     };
 
     remove(userId) {

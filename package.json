@@ -29,6 +29,7 @@
     "npm-run-all": "^4.0.2"
   },
   "dependencies": {
+    "bcrypt": "1.0.2",
     "bluebird": "3.5.0",
     "eslint-plugin-async-await": "0.0.0",
     "knex": "^0.12.9",

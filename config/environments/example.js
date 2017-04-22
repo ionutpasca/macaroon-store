@@ -1,17 +1,17 @@
 module.exports = {
     port: 8081,
-    host: '127.0.0.1',
-    SALT_FACTOR: 5,
+    host: '<HOST>',
     app: {
         name: 'Macaroon Store'
     },
+	//SALT_FACTOR:
     database: {
         client: 'mysql',
         connection: {
-            host: '127.0.0.1',
-            user: 'root',
-            password: 'root',
-            database: 'world'
+            host: '<DB HOST>',
+            user: '<DB USER>',
+            password: '<DB PASS>',
+            database: '<DATABASE>'
         },
         pool: {
             min: 2,
