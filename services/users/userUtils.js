@@ -30,7 +30,10 @@ class UserUtils {
             email: user.email,
             password: user.password || null,
             name: user.name,
-            points: user.points || 1
+            points: user.points || 0,
+            facebook_id: user.facebook_id || null,
+            profile_image_path: user.profile_image_path || null,
+            profile_image_url: user.profile_image_url || null
         };
         return dbUser;
     };

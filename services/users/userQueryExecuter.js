@@ -8,10 +8,16 @@ class UserQueryExecuter {
         ];
     };
 
-    getOne(userId) {
+    getOne(queryData) {
+        let whereCondition = {};
+        for (let key in queryData) {
+            let conditionKey = 'users.' + key;
+            whereCondition[conditionKey] = queryData[key];
+        }
+
         const selectFields = this.fieldsAllowedToSelect.concat('roles.name as roles:role');
         return this.knex('users')
-            .where({ 'users.id': userId })
+            .where(whereCondition)
             .innerJoin('user_roles', 'user_roles.user_id', '=', 'users.id')
             .innerJoin('roles', 'user_roles.role_id', '=', 'roles.id')
             .select(selectFields);

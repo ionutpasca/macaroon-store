@@ -19,12 +19,12 @@ function initialize(knex) {
         entity: 'users',
         action: 'get_one'
     }, async (args, callback) => {
-        if (!args.id) {
-            return callback('no id');
+        if (!args.data) {
+            return callback('no data');
         }
         try {
-            const userId = parseInt(args.id);
-            const getResult = await queryExecuter.getOne(userId);
+            // const userId = parseInt(args.id);
+            const getResult = await queryExecuter.getOne(args.data);
             let users = userUtils.growTreeFromData(getResult)[0];
 
             callback(null, users);
@@ -98,7 +98,7 @@ function initialize(knex) {
             if (user.password) {
                 userToInsert.password = await userUtils.encryptPassword(user.password);
             }
-
+            
             const insertedUserId = await queryExecuter.insert(userToInsert, userRole);
             userToInsert = _.assign(userToInsert,
                 {
