@@ -4,7 +4,8 @@ class UserQueryExecuter {
     constructor(knex) {
         this.knex = knex;
         this.fieldsAllowedToSelect = ['users.id', 'users.email', 'users.name', 'users.points',
-            'users.rank', 'users.created_at', 'users.last_login'
+            'users.rank', 'users.created_at', 'users.last_login', 'users.profile_image_path',
+            'users.profile_image_url'
         ];
     };
 
