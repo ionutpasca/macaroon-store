@@ -1,6 +1,7 @@
 const config = require('./config/main');
 const knex = require('knex');
 const quark = require('quark')();
+const logger = require('./config/winston');
 
 const ENV = process.env.NODE_ENV || 'development';
 const knexInstance = knex(config.database);
@@ -19,7 +20,7 @@ if (!module.parent) {
         if (err) {
             throw err;
         }
-        console.log(`${config.app.name} is running, listening on port ${config.port}, environment: ${ENV.toLowerCase()}`);
+        logger.info(`${config.app.name} is running, listening on port ${config.port}, environment: ${ENV.toLowerCase()}`);
     });
 }
 
