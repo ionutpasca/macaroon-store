@@ -6,6 +6,8 @@ function up(knex, Promise) {
 				table.increments('id').primary();
 				table.integer('first_user').unsigned().notNullable().references('id').inTable('users');
 				table.integer('second_user').unsigned().notNullable().references('id').inTable('users');
+				table.dateTime('created_at');
+				table.integer('initializer_id').unsigned().notNullable().references('id').inTable('users');
 			}),
 		
 		knex.schema
@@ -21,7 +23,8 @@ function up(knex, Promise) {
 
 function down(knex, Promise) {
 	return Promise.all([
-
+		knex.schema.dropTableIsExists('chat_rooms'),
+		knex.schema.dropTableIsExists('chat_messages')
 	]);
 };
 
