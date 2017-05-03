@@ -35,10 +35,10 @@ class ChatQueryExecuter {
 			.where(condition)
 			.innerJoin(this.MESSAGES_TABLE, 'chat_rooms.id', '=', 'chat_messages.chat_room_id')
 			.select(fieldsToSelect);
-		if(roomWithMessages.length) {
+		if (roomWithMessages.length) {
+			console.log("ROOM WITH MESSAGES", roomWithMessages);
 			return roomWithMessages;
 		}
-
 		const chatRoom = await this.knex(this.CHAT_ROOM_TABLE).where(condition).select(['chat_rooms.id']);
 		return chatRoom;
 	};
@@ -58,22 +58,22 @@ class ChatQueryExecuter {
 	};
 
 	async createChatRoom(firstUserId, secondUserId, currentUser) {
+		firstUserId = parseInt(firstUserId);
+		secondUserId = parseInt(secondUserId);
 		if (firstUserId > secondUserId) {
 			secondUserId = [firstUserId, firstUserId = secondUserId][0];
 		}
 		const chatRoom = {
 			first_user: parseInt(firstUserId),
 			second_user: parseInt(secondUserId),
-			created_at: new Date(),
+			created_at: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
 			initializer_id: parseInt(currentUser) || null
 		};
 
-		const fieldsToSelect = ['chat_rooms.id'].concat(this.messagesFieldsToSelect);
 		const insertedChatRoomId = await this.knex.insert(chatRoom).into(this.CHAT_ROOM_TABLE);
 		return this.knex(this.CHAT_ROOM_TABLE)
-			.where({ 'id': insertedChatRoomId })
-			.innerJoin('chat_messages', 'chat_rooms.id', '=', 'chat_messages.chat_room_id')
-			.select(fieldsToSelect);
+			.where({ 'chat_rooms.id': insertedChatRoomId })
+			.select(['chat_rooms.id']);
 	};
 
 	saveMessage(senderId, roomId, messageInfo) {

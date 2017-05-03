@@ -1,5 +1,7 @@
 'use strict';
 
+const logger = require('../../config/winston');
+
 class UserQueryExecuter {
     constructor(knex) {
         this.knex = knex;
@@ -66,18 +68,21 @@ class UserQueryExecuter {
         return new Promise((resolve, reject) => {
             this.knex.transaction(async trx => {
                 try {
+                    logger.info('INTUR IN TRY');
                     const insertedUserId = await trx.insert(user).into('users');
+                    logger.info('INSERTED USER', insertedUserId)
                     const userRole = {
                         role_id: role.id,
                         user_id: insertedUserId[0]
                     };
-
+                    logger.info('ROLE', userRole);
                     await trx.insert(userRole).into('user_roles')
                     await trx.increment('rank').where('points', '<', user.points).into('users');
 
                     trx.commit;
                     resolve(insertedUserId[0]);
                 } catch (error) {
+                    logger.error('ERROR', error);
                     trx.rollback();
                     reject(error);
                 }

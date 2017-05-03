@@ -28,14 +28,17 @@ function initialize(knex) {
 			if (!chatRoomData.length) {
 				chatRoomData = await queryExecuter.createChatRoom(args.first_user_id, args.second_user_id, args.initializer_id);
 			}
-
 			const messages = chatUtils.getMessagesFromResultData(chatRoomData);
 			const result = {
 				id: chatRoomData[0].id,
 				messages: messages
 			};
+			if (messages.length) {
+				Object.assign(result, { messages: messages });
+			}
 			callback(null, result);
 		} catch (error) {
+			console.log("ERR", error);
 			callback(error);
 		}
 	});

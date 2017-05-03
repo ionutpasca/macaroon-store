@@ -16,6 +16,9 @@ class ChatUtils {
 	};
 
 	getMessagesFromResultData(resultData) {
+		if(!resultData[0].sender) {
+			return [];
+		}
 		return _.map(resultData, (data) => {
 			return {
 				sender: data.sender,

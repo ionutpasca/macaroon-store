@@ -5,6 +5,7 @@ const userUtils = new UserUtils();
 
 const UserQueryExecuter = require('./userQueryExecuter');
 const RoleQueryExecuter = require('../roles/roleQueryExecuter');
+const logger = require('../../config/winston');
 
 const quark = require('quark')();
 const _ = require('lodash');
@@ -67,6 +68,7 @@ function initialize(knex) {
             const userExists = await queryExecuter.userExists(args.email);
             callback(null, userExists);
         } catch (error) {
+            logger.error('Error checking if user exists', error);
             callback(error);
         }
     });
@@ -107,6 +109,7 @@ function initialize(knex) {
                 });
             callback(null, userToInsert);
         } catch (error) {
+            logger.error('Error inserting user', error);
             callback(error);
         };
     });
